@@ -1,0 +1,17 @@
+---
+# handlers file for roles/knot
+- name: knot_restart
+  systemd:
+     name: knot
+     state: restarted
+- name: check_conf
+  shell: knotc conf-check
+  register: check
+- name: debug_check_conf
+  debug:
+     var: check.stdout
+- name: sshd_restart
+  systemd:
+     name: sshd
+     state: restarted
+...

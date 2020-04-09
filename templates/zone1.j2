@@ -1,0 +1,38 @@
+;; Zone dump (Knot DNS 2.8.5)
+@                             10800   IN  SOA  ns1.{{ zone1 }} admin.{{ zone1 }}  (
+                              2018083817    ;  Numero
+                              28800         ;  Refresh
+                              14400         ;  Retry
+                              3600000       ;  Expire
+                              86400 )       ;  Minimum
+
+                           IN 3600  NS    ns1.{{ zone1 }}
+                           IN 3600  NS    ns2.{{ zone1 }}
+
+ns1.{{ zone1 }}             	3600	A	    {{ master.ip }}
+ns1.{{ zone1 }}             	3600	AAAA	{{ master.ip6 }}
+
+ns2.{{ zone1 }}             	3600	A	    {{ slave.ip }}
+ns2.{{ zone1 }}             	3600	AAAA	{{ slave.ip6 }}
+;;
+{{ zone1 }}                  	3600	MX 10 {{ zone1 }}
+{{ zone1 }}                 	3600	CAA	0 iodef "mailto:{{ admin_mail }}"
+{{ zone1 }}                 	3600	CAA	0 issue "letsencrypt.org"
+{{ zone1 }}                 	3600	CAA	0 issuewild ";"
+
+{{ zone1 }}                 	3600	A	    {{ app.ip }}
+www.{{ zone1 }}             	3600	A	    {{ app.ip }}
+
+next.{{ zone1 }}            	3600	A	    {{ cloud.ip }}
+{{ zone1 }}                 	3600	TXT	  "v=spf1 a mx +ip4:{{ app.ip }}/32 -all"
+_acme-challenge.{{ zone1 }} 	   0	TXT	  "ctN9imsgGnCFlm-qzrNN591RirYUTJAnmg_lalWeZBQ"
+_dmarc.{{ zone1 }}  	         600	TXT	  "v=DMARC1; p=quarantine; rua=mailto:{{ vault_admin_mail }}; ruf=mailto:{{ vault_admin_mail }}; fo=1; adkim=s; aspf=s; pct=100; rf=afrf; ri=86400; sp=quarantine"
+mail._domainkey.{{ zone1 }} 	3600	TXT	  "{{ dkim2_values }}"
+_smtp._tls.{{ zone1 }}	         0	TXT	  "v=TLSRPTv1; rua=mailto:{{ admin_mail }}"
+ownercheck.ns1.{{ zone1 }}       0	TXT	  "9f7ee932"
+ownercheck.ns2.{{ zone1 }}	     0	TXT	  "dad540ce"
+ownercheck.{{ zone1 }}	         0	TXT	  "37173b67"
+
+_443._tcp.next.{{ zone1 }}	     0	TLSA  3 1 1 {{ tlsa_domain1 }}"
+
+9edb994fd87c837eeed0a8e30b3fe1d4561c3815268040f6bbf352fd._openpgpkey.{{ zone1 }} 3600	OPENPGPKEY	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

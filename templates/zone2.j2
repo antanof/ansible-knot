@@ -1,0 +1,45 @@
+;; Zone dump (Knot DNS 2.8.5)
+@                             10800   IN  SOA  ns.{{ zone2 }} admin.{{ zone1 }}  (
+                              2018090938    ;  Numero
+                              28800         ;  Refresh
+                              14400         ;  Retry
+                              3600000       ;  Expire
+                              86400 )       ;  Minimum
+
+{{ zone2 }}                  3600	NS	ns.{{ zone2 }}
+{{ zone2 }}   	             3600	NS	ns1.{{ zone2 }}
+
+ns.{{ zone2 }}               3600	A	{{ master.ip }}
+ns.{{ zone2 }}	             3600	AAAA	{{ master.ip6 }}
+ns1.{{ zone2 }}	             3600	A	{{ slave.ip }}
+ns1.{{ zone2 }}	             3600	AAAA	{{ slave.ip6 }}
+
+{{ zone2 }}                  3600 CAA 0 iodef "mailto:{{ admin_mail }}"
+{{ zone2 }}                  3600 CAA 0 issue "letsencrypt.org"
+{{ zone2 }}                  3600 CAA 0 issuewild ";"
+
+{{ zone2 }}   	             3600	A	{{ hypervisor.ip }}
+{{ spam.hostname }}.{{ zone2 }}	           3600	A	{{ spam.ip }}
+{{ stor.hostname }}.{{ zone2 }}	           3600	A	{{ stor.ip }}
+{{ nas.hostname }}.{{ zone2 }}	         3600	A	{{ nas.ip }}
+{{ mail.hostname }}.{{ zone2 }}          	 3600	A	{{ mail.ip }}
+{{ webmail.hostname }}.{{ zone2 }}	         3600	A	{{ webmail.ip }}
+{{ hme.hostname }}.{{ zone2 }}	             3600	A	{{ hme.ip }}
+{{ hme.hostname }}.{{ zone2 }}	             3600	AAAA	{{ hme.ip6 }}
+{{ zone2 }}   	             3600	AAAA	{{ hypervisor.ip6 }}
+{{ zone2 }}   	             3600	MX	0 mail.{{ zone2 }}
+;; _dmarc.{{ zone2 }}	         3600	TXT	"v=DMARC1; p=none; adkim=r; aspf=r;"
+_dmarc.{{ zone2 }}	         3600	TXT	"v=DMARC1; p=reject; sp=reject; pct=100; rua=mailto:postmaster@{{ domain2 }}; ruf=mailto:postmaster@{{ domain2 }}; fo=d; adkim=s; aspf=s; rf=afrf: ri=86400"
+_adsp._domainkey.{{ zone2 }} 3600 TXT "dkim=all"
+mail._domainkey.{{ zone2 }}  3600	TXT	"{{ dkim_values }}"
+ownercheck.{{ zone2 }}	     3600	TXT	"f6bf8181"
+ownercheck.stor.{{ zone2 }}  3600	TXT	"c358b3b6"
+{{ zone2 }}   	             3600	TXT	"v=spf1 mx ~all"
+;; {{ zone2 }}               3600 TXT "v=spf1 mx a:{{ domain2 }} include:{{ mail.ip }} ~all"
+{{ zone2 }}             	   3600	TXT	"My personal domain - Domaine personnel"
+
+_25._tcp.mail.{{ zone2 }}	      0 TLSA	3 0 1 {{ tlsa_domain2 }}
+_443._tcp.mail.{{ zone2 }}      0	TLSA	3 0 1 {{ tlsa_domain2 }}
+_465._tcp.mail.{{ zone2 }}      0	TLSA	3 0 1 {{ tlsa_domain2 }}
+_587._tcp.mail.{{ zone2 }}      0	TLSA	3 0 1 {{ tlsa_domain2 }}
+_993._tcp.mail.{{ zone2 }}      0	TLSA	3 0 1 {{ tlsa_domain2 }}

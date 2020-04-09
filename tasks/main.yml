@@ -1,0 +1,18 @@
+---
+# tasks file for roles/knot
+
+
+- name: === Configure DNS ===
+  include: config.yml
+  tags: config
+
+- name: === Control DNS ===
+  include: control.yml
+  tags: control
+
+- name: === Update DNS Config ===
+  include: update_dns.yml
+  when:
+     - ansible_fqdn == master.fqdn
+  tags: update
+...

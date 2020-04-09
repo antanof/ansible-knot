@@ -1,0 +1,54 @@
+---
+- name: Ensure knot package is present
+  apt_repository:
+     repo: deb-src https://deb.knot-dns.cz/knot/ buster main
+     filename: "knot"
+     state: present
+- package:
+     name: knot
+     state: latest
+- name: Check Knot configuration file
+  template:
+     src: "knot.conf.j2"
+     dest: /etc/knot/knot.conf
+     owner: knot
+     group: knot
+     mode: '0640'
+  notify: [ check_conf, debug_check_conf, knot_restart ]
+  #- name: Add attribute to Knot configuration file
+  #  file:
+  #     dest: /etc/knot/knot.conf
+  #     attributes: "+i"
+- name: Create log directory
+  file:
+     path: /var/log/knot
+     state: directory
+     owner: knot
+     group: knot
+- name: Configure knot logrotate
+  template:
+     src: "logrotate_knot.j2"
+     dest: /etc/logrotate.d/knot
+     owner: root
+     group: root
+     mode: '0644'
+  notify: [ check_conf, debug_check_conf, knot_restart ]
+- name: zone1 configuration files
+  template:
+     src: "zone1.j2"
+     dest: /var/lib/knot/{{ domain1 }}.zone.nodnssec
+     owner: knot
+     group: knot
+     mode: '0660'
+  when: ansible_fqdn == master.fqdn
+#  notify: [ check_conf, debug_check_conf, knot_restart ]
+- name: zone2 configuration files
+  template:
+     src: "zone2.j2"
+     dest: /var/lib/knot/{{ domain2 }}.zone.nodnssec
+     owner: knot
+     group: knot
+     mode: '0660'
+  when: ansible_fqdn == master.fqdn
+#  notify: [ check_conf, debug_check_conf, knot_restart ]
+...

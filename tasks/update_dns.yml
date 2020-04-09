@@ -1,0 +1,26 @@
+---
+- name: Create config file
+  file:
+     path: /tmp/knsupdate.txt
+     owner: root
+     group: root
+     state: touch
+- name: Write new entry in DNS Zone
+  blockinfile:
+     path: /tmp/knsupdate.txt
+     marker: ""
+     block: |
+        server {{ server }}
+        zone {{ zone1 }}
+        update {{ update }} {{ subdomain }}.{{ zone1 }} {{ TTL }} IN {{ champs }} "{{ value }}"
+        send
+        quit
+- name: Send Update {{ update }} to DNS Master Server
+  shell: knsupdate /tmp/knsupdate.txt
+  args:
+     executable: /bin/bash
+- name: Delete conf file
+  file:
+     path: /tmp/knsupdate.txt
+     state: absent
+...

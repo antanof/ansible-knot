@@ -1,0 +1,12 @@
+/var/log/knot/*.log {
+  daily
+  missingok
+  rotate 14
+  compress
+  notifempty
+  create 0640 knot knot
+  sharedscripts
+  postrotate
+    service knot restart
+  endscript
+}

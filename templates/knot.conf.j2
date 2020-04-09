@@ -1,0 +1,137 @@
+#
+# This is a sample of a minimal configuration file for Knot DNS.
+# For more details, see man 5 knot.conf or refer to the server documentation.
+#
+server:
+    identity: {{ ansible_fqdn }}
+    # Listen on all configured IPv4 & IPv6 interfaces. {{ ansible_default_ipv4.address }} {{ ansible_default_ipv6.address }}
+    listen: [0.0.0.0@53, ::@53]
+    # User for running the server.
+    user: knot:knot
+    rundir: "/run/knot"
+
+log:
+    # Log info and more serious events to syslog.
+  - target: "/var/log/knot/knot.log"
+    any: info
+
+{% if ansible_fqdn == master.fqdn %}
+mod-rrl:
+  - id: default
+    rate-limit: 200
+    slip: 2
+
+key:
+  - id: dns_key
+    algorithm: hmac-sha256
+    secret: {{ dns_key }}
+  - id: key_update_local
+    algorithm: hmac-sha256
+    secret: {{ key_update_local }}
+
+remote:
+  - id: local
+    address: 127.0.0.1
+  - id: ns2
+    address: [{{ slave.ip6 }}@53, {{ slave.ip }}@53]
+    key: dns_key
+  - id: dns1_ovh
+    address: 213.251.188.141@53
+  - id: dns2_ovh
+    address: 54.37.85.97@53
+
+submission:
+  - id: ns2_sbm
+    parent: ns2
+#    check-interval: 1 hour
+#    timeout: 0
+
+policy:
+  - id: rsa2k
+    algorithm: RSASHA256
+    ksk-size: 4096
+    zsk-size: 2048
+    zsk-lifetime: 30d
+    ksk-lifetime: 365d
+    nsec3: on
+  - id: ececc
+    algorithm: ecdsap384sha384
+    nsec3: on
+
+acl:
+  - id: ns2_acl
+    address: [{{ slave.ip6 }}, {{ slave.ip }}]
+    action: [transfer, notify]
+    key: dns_key
+  - id: ns1_acl
+    address: 127.0.0.1
+    action: update
+#    key: key_update_local
+  - id: ovh_dns1_acl
+    address: 213.251.188.141
+    action: notify # transfer
+  - id: ovh_dns2_acl
+    address: 54.37.85.97
+    action: notify # transfer
+
+template:
+  - id: default
+    storage: "/var/lib/knot"
+
+zone:
+# Master zone.
+  - domain: "{{ zone1 }}"
+    file: "{{ zone1 }}zone"
+    notify: ns2 # , dns1_ovh, dns2_ovh]
+    acl: [ns1_acl, ns2_acl] #, ovh_dns1_acl, ovh_dns2_acl]
+    dnssec-signing: on
+    dnssec-policy: rsa2k
+#    dnssec-policy: shared
+    zonefile-load: difference
+    semantic-checks: on
+    module: mod-rrl/default
+
+  - domain: "{{ zone2 }}"
+    file: "{{ zone2 }}zone"
+    notify: ns2
+    acl: [ns1_acl, ns2_acl]
+    dnssec-signing: on
+    dnssec-policy: rsa2k
+#    dnssec-policy: shared
+    zonefile-load: difference
+    semantic-checks: on
+    module: mod-rrl/default
+{% endif %}
+{% if ansible_fqdn == slave.fqdn %}
+key:
+  - id: dns_key
+    algorithm: hmac-sha256
+    secret: {{ dns_key }}
+
+remote:
+  - id: ns1
+    address: [{{ master.ip6 }}@53, {{ master.ip }}@53]
+    key: dns_key
+
+acl:
+  - id: ns1_acl
+    address: [{{ master.ip6 }}, {{ master.ip }}]
+    action: notify
+    key: dns_key
+
+template:
+  - id: default
+    storage: "/var/lib/knot"
+
+zone:
+# Master zone.
+  - domain: "{{ zone1 }}"
+    file: "{{ zone1 }}zone"
+    master: ns1
+    acl: ns1_acl
+
+  - domain: "{{ zone2 }}"
+    file: "{{ zone2 }}zone"
+    master: ns1
+    acl: ns1_acl
+{% endif %}

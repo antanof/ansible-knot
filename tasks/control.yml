@@ -1,0 +1,32 @@
+---
+- name: Control Presence DNS Master & Slave
+  ping:
+- name: Control Presence DNS Slave from Master
+  shell: ping4 -c 2 "{{ slave.ip }}"
+  register: ping
+  when:
+     - ansible_fqdn == master.fqdn
+- debug:
+     var: ping.stdout
+  when:
+     - ansible_fqdn == master.fqdn
+       #- name: Delete attribute to Knot configuration file
+       #  file:
+       #     dest: /etc/knot/knot.conf
+       #     attributes: "-i"
+- name: Check SSH authorized keys
+  template:
+     src: authorized_keys.j2
+     dest: /root/.ssh/authorized_keys
+     owner: root
+     group: root
+     mode: '0644'
+- name: Check SSH Config
+  template:
+     src: sshd_config.j2
+     dest: /etc/ssh/sshd_config
+     owner: root
+     group: root
+     mode: '0644'
+     validate: /usr/sbin/sshd -t -f %s
+  notify: sshd_restart
