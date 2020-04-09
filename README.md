@@ -1,7 +1,6 @@
-Role Name
+Knot
 =========
-
-A brief description of the role goes here.
+Manage Knot DNS Authoritative master & slave Servers
 
 Requirements
 ------------
