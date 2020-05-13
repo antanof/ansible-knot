@@ -41,7 +41,7 @@
      group: knot
      mode: '0660'
   when: ansible_fqdn == master.fqdn
-#  notify: [ check_conf, debug_check_conf, knot_restart ]
+  notify: [ check_conf, debug_check_conf, knot_restart ]
 - name: zone2 configuration files
   template:
      src: "zone2.j2"
@@ -50,5 +50,5 @@
      group: knot
      mode: '0660'
   when: ansible_fqdn == master.fqdn
-#  notify: [ check_conf, debug_check_conf, knot_restart ]
+  notify: [ check_conf, debug_check_conf, knot_restart ]
 ...
