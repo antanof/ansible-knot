@@ -35,10 +35,6 @@ remote:
   - id: ns2
     address: [{{ slave.ip6 }}@53, {{ slave.ip }}@53]
     key: dns_key
-  - id: dns1_ovh
-    address: 213.251.188.141@53
-  - id: dns2_ovh
-    address: 54.37.85.97@53
 
 submission:
   - id: ns2_sbm
@@ -67,12 +63,6 @@ acl:
     address: 127.0.0.1
     action: update
 #    key: key_update_local
-  - id: ovh_dns1_acl
-    address: 213.251.188.141
-    action: notify # transfer
-  - id: ovh_dns2_acl
-    address: 54.37.85.97
-    action: notify # transfer
 
 template:
   - id: default
@@ -82,8 +72,8 @@ zone:
 # Master zone.
   - domain: "{{ zone1 }}"
     file: "{{ zone1 }}zone"
-    notify: ns2 # , dns1_ovh, dns2_ovh]
-    acl: [ns1_acl, ns2_acl] #, ovh_dns1_acl, ovh_dns2_acl]
+    notify: ns2 
+    acl: [ns1_acl, ns2_acl]
     dnssec-signing: on
     dnssec-policy: rsa2k
 #    dnssec-policy: shared
